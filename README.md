@@ -1,10 +1,10 @@
-# vtab-pytorch
+# VTAB-1K pytorch
 
 Plug &amp; Play implementation of the Visual Task Adaptation 1K Benchmark (VTAB-1K) in pytorch
 
 # Setup
 
-Instructions to setup environment/code and data are provided in SETUP_DATA.md and SETUP_ENV.md
+Instructions to setup environment/code and data are provided in [SETUP_DATA.md](https://github.com/BenediktAlkin/vtab1k-pytorch/blob/main/SETUP_DATA.md) and [SETUP_ENV.md](https://github.com/BenediktAlkin/vtab1k-pytorch/blob/main/SETUP_ENV.md).
 
 # Evaluation Protocol
 
