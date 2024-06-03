@@ -1,0 +1,10 @@
+# general
+default_account: <PROJECT>
+
+# working/log directories
+chdir: ${env:HOME}/vtab-pytorch
+output: ${env:HOME}/logs/%j.out
+
+# environment setup
+env_name: v4
+
