@@ -23,6 +23,11 @@ You can easily parallelize the whole pipeline by simply starting multiple runner
 
 A pipeline with a small model to test if your setup is correctly setup can be found in `pipelines/debug/debug.yaml`.
 
+# Results
+
+The results of each run are written into the corresponding yaml.
+The script `main_parse_results.py` summarizes the result of a full VTAB-1K pipeline into a single value for each dataset.
+
 # SLURM
 - Copy `sbatch_config_example.yaml` as `sbatch_config.yaml` and adjust the values to your setup.
 - Copy `template_sbatch_example.sh` as `template_sbatch.sh` and adjust the values to your setup.
