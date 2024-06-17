@@ -52,7 +52,7 @@ def _get_layerwise_lr_decay_properties(model, name, decay):
     elif name.startswith("block"):
         layer = int(name.split('.')[1]) + 1
         return dict(lr_scale=scales[layer])
-    elif name.startswith("norm."):
+    elif name.startswith("norm.") or name.startswith("legacy_norm."):
         # last norm is not scaled (i.e. original learning rate)
         return {}
     elif name.startswith("head_norm."):
