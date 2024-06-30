@@ -1,4 +1,4 @@
-def create_param_groups(model, lr, weight_decay=0., layerwise_lr_decay=None):
+def create_param_groups(model, lr, weight_decay=0., layerwise_lr_decay=None, group_two_blocks=False):
     param_groups = []
     for name, param in model.named_parameters():
         properties = {}
@@ -15,7 +15,14 @@ def create_param_groups(model, lr, weight_decay=0., layerwise_lr_decay=None):
 
         # layerwise_lr_decay
         if layerwise_lr_decay is not None:
-            properties.update(_get_layerwise_lr_decay_properties(model=model, name=name, decay=layerwise_lr_decay))
+            properties.update(
+                _get_layerwise_lr_decay_properties(
+                    model=model,
+                    name=name,
+                    decay=layerwise_lr_decay,
+                    group_two_blocks=group_two_blocks,
+                ),
+            )
 
         # add param_group
         properties["name"] = name
@@ -25,7 +32,7 @@ def create_param_groups(model, lr, weight_decay=0., layerwise_lr_decay=None):
     return param_groups
 
 
-def _get_layerwise_lr_decay_properties(model, name, decay):
+def _get_layerwise_lr_decay_properties(model, name, decay, group_two_blocks):
     # adapted from BEiT: https://github.com/microsoft/unilm/blob/master/beit/optim_factory.py#L33
     # this will split the model into len(blocks) + 2 "layers"
     # stem (patch_embed, cls_token, pos_embed) -> blocks -> last norm
@@ -33,13 +40,20 @@ def _get_layerwise_lr_decay_properties(model, name, decay):
     if hasattr(model, "blocks"):
         num_layers = len(model.blocks) + 1
     elif hasattr(model, "model"):
-        # e.g. torch_hub_model
-        assert hasattr(model.model, "blocks")
-        num_layers = len(model.model.blocks) + 1
+        if hasattr(model.model, "blocks"):
+            # e.g. torch_hub_model
+            num_layers = len(model.model.blocks) + 1
+        elif hasattr(model.model, "layers"):
+            # vision-mamba
+            num_layers = len(model.model.layers) + 1
+        else:
+            raise NotImplementedError
         if name.startswith("model."):
             name = name[len("model."):]
     else:
         raise NotImplementedError
+    if group_two_blocks:
+        num_layers = num_layers // 2 + num_layers % 2
     scales = list(decay ** (num_layers - i) for i in range(num_layers))
     if (
             name.startswith("patch_embed")
@@ -49,10 +63,12 @@ def _get_layerwise_lr_decay_properties(model, name, decay):
             or name == "mask_token"
     ):
         return dict(lr_scale=scales[0])
-    elif name.startswith("block"):
+    elif name.startswith("block") or name.startswith("layer"):
         layer = int(name.split('.')[1]) + 1
+        if group_two_blocks:
+            layer = (layer - 1) // 2 + 1
         return dict(lr_scale=scales[layer])
-    elif name.startswith("norm.") or name.startswith("legacy_norm."):
+    elif name.startswith("norm.") or name.startswith("legacy_norm.") or name.startswith("norm_f."):
         # last norm is not scaled (i.e. original learning rate)
         return {}
     elif name.startswith("head_norm."):

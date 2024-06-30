@@ -1,13 +1,15 @@
-import timm
 from torch import nn
 
 
-class TimmModel(nn.Module):
+class VilModel(nn.Module):
     def __init__(self, identifier, input_shape, num_outputs):
-        # "deit3_small_patch16_224"
+        # "vil2-tiny"
+        # "vil2-tiny-e400"
+        # "vil2-small"
+        # "vil2-base"
         super().__init__()
         assert input_shape == (3, 224, 224)
-        self.model = timm.create_model(identifier, pretrained=True)
+        self.model = torch.hub.load("nx-ai/vision-lstm", identifier)
         self.model.head = nn.Linear(self.dim, num_outputs)
         nn.init.trunc_normal_(self.model.head.weight, std=2e-5)
         nn.init.zeros_(self.model.head.bias)
@@ -17,8 +19,4 @@ class TimmModel(nn.Module):
 
     @property
     def dim(self):
-        if hasattr(self.model, "embed_dim"):
-            return self.model.embed_dim
-        if hasattr(self.model, "num_features"):
-            return self.model.num_features
-        raise NotImplementedError
+        return self.model.dim
