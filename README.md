@@ -23,6 +23,22 @@ You can easily parallelize the whole pipeline by simply starting multiple runner
 
 A pipeline with a small model to test if your setup is correctly setup can be found in `pipelines/debug/debug.yaml`.
 
+# Overview of training pipeline
+
+The `main_runner.py` script will continuously fetch a new yaml file from the `work_area` and move it into the subfolder
+`work_area/running`. It will then process the yaml (which is either training a model, checking if other runs finished
+to create a summary or generating new yamls). After the yaml is finished, it will write a result into the file and move 
+it to `work_area/finished`.
+In the case where a run needs other runs in order to be considered `finished` (e.g. if hyperparameters are tuned on the
+validation set, all hyperparameter search runs need to be finished before the evaluation runs on the testset are 
+started), it will instead be moved into `work_area/waiting` and wait for the other runs to finish. If a run crashes, 
+it will be moved into `work_area/crashed`. After all runs are finished, a summary is created in `work_area/summarized`
+which can then be easily parsed with `main_parse_results.py`. 
+
+If for whatever reasons runs get stuck in `work_area/running` or crash and are moved into `work_area/crashed`, you can
+simply restart them by moving them to `work_area`.
+
+
 # Results
 
 The results of each run are written into the corresponding yaml.
