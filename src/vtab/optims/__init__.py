@@ -13,6 +13,7 @@ def create_optim(optim, model, lr, batch_size, schedule=None):
         lr=scaled_lr,
         weight_decay=optim.pop("weight_decay", 0.),
         layerwise_lr_decay=optim.pop("layerwise_lr_decay", None),
+        group_two_blocks=optim.pop("group_two_blocks", False),
     )
 
     # create torch optim

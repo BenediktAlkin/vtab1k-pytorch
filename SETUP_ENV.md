@@ -8,6 +8,9 @@ Required packages:
 - torchmetrics (`pip install torchmetrics`)
 - pandas (`pip install pandas`)
 
+NOTE: make sure that `torchmetrics` is up to date. sun397 train800 and train800val200 splits only have 396 classes
+whereas the test split has 397 classes. Older versions of `torchmetrics` do not support this case.
+
 # Setup configs
 
 You'll need to specify some properties that are dependent on your server environment in a file called `static_config.yaml`.
