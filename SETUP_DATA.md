@@ -1,6 +1,7 @@
 # Setup VTAB-1K
 
-VTAB-1K is fully preprocessed and can be found [here](https://drive.google.com/file/d/1yZKwiKdsBzTfBgnStRveYMokc7GMMd5p). 
+We use the preprocessed VTAB-1K dataset from [RepAdapter](https://github.com/luogen1996/RepAdapter?tab=readme-ov-file#data-preparation).
+It is fully preprocessed and can be found [here](https://drive.google.com/file/d/1yZKwiKdsBzTfBgnStRveYMokc7GMMd5p). 
 You can also download it via command line:
 
 ```
