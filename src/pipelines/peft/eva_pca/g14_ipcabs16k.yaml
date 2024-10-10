@@ -1,0 +1,45 @@
+current_stage: prepare_eva_pca
+prepare_eva_pca:
+  next_stage: eva_pca
+  processor:
+    kind: resolve_datasetgrid_processor
+    paths:
+      - eva_pca.hyperparams.dataset.version
+    versions:
+      - caltech101
+      - cifar
+      - clevr_count
+      - clevr_dist
+      - diabetic_retinopathy
+      - dmlab
+      - dsprites_loc
+      - dsprites_ori
+      - dtd
+      - eurosat
+      - kitti
+      - oxford_flowers102
+      - oxford_iiit_pet
+      - patch_camelyon
+      - resisc45
+      - smallnorb_azi
+      - smallnorb_ele
+      - sun397
+      - svhn
+eva_pca:
+  hyperparams:
+    trainer:
+      kind: eva_pca_trainer
+    dataset:
+      kind: vtab1k_dataset
+      version: cifar
+      split: train800
+      transform: resize224bicubic_imagenetnorm
+    model:
+      kind: dinov2_model
+      identifier: dinov2_vitg14
+      split_qkv: true
+    pca_batch_size: 16384
+    pca_batch_size_head: 800
+    batch_size: 50
+    rank: 32
+    seed: 0

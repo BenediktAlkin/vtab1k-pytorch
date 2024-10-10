@@ -1,0 +1,80 @@
+current_stage: prepare_datasets
+prepare_datasets:
+  next_stage: prepare_tune
+  processor:
+    kind: resolve_datasetgrid_processor
+    paths:
+      - run_tune.grid.train_dataset.version
+      - run_tune.grid.eval_dataset.version
+    versions:
+      - caltech101
+      - cifar
+      - clevr_count
+      - clevr_dist
+      - diabetic_retinopathy
+      - dmlab
+      - dsprites_loc
+      - dsprites_ori
+      - dtd
+      - eurosat
+      - kitti
+      - oxford_iiit_pet
+      - patch_camelyon
+      - resisc45
+      - smallnorb_azi
+      - smallnorb_ele
+      - sun397
+      - svhn
+prepare_tune:
+  next_stage: run_tune
+  processor:
+    kind: resolve_gridsearch_processor
+run_tune:
+  next_stage: prepare_eval
+  grid:
+    trainer:
+      kind: peft_trainer
+    train_dataset:
+      kind: vtab1k_dataset
+      version: ???
+      split: train800
+      transform: resize224bicubic_imagenetnorm
+    eval_dataset:
+      kind: vtab1k_dataset
+      version: ???
+      split: val200
+      transform: resize224bicubic_imagenetnorm
+    model:
+      kind: dinov2_peft_model
+      identifier: facebook/dinov2-giant
+    optim:
+      kind: adamw
+      weight_decay: 0.05
+      betas: [ 0.9, 0.999 ]
+      lr_scale_factor: 64
+    peft_config:
+      kind: adalora_config
+      bias: all
+      orth_reg_weight: 0.1
+      deltaT: 10
+    rank: [ 2, 4, 8, 16]
+    epochs: 30
+    lr: [ 2.5e-3, 1.0e-3, 7.5e-4, 5.0e-4, 2.5e-4]
+    batch_size: 64
+    schedule: warmup-cosine-10%
+    precision: bf16
+    seed: [ 0, 1, 2 ]
+prepare_eval:
+  next_stage: run_eval
+  processor:
+    kind: eval_gridsearch_processor
+    seeds: [ 0, 1, 2, 3, 4 ]
+    train_split: train800val200
+    eval_split: test
+run_eval:
+  next_stage: summarize
+summarize:
+  processor:
+    kind: summarize_gridsearch_processor
+    tune_stage_name: run_tune
+    eval_stage_name: run_eval

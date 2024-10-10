@@ -109,6 +109,14 @@ class FinetuneTrainer(BaseTrainer):
                     loss = F.cross_entropy(y_hat, y[start:end])
                 grad_scaler.scale(loss / accumulation_steps).backward()
             optim.step(update=update)
+            # adalora handling
+            if (
+                    hasattr(model, "model")
+                    and hasattr(model.model, "base_model")
+                    and hasattr(model.model.base_model, "update_and_allocate")
+            ):
+                model.model.base_model.update_and_allocate(update)
+
 
         # eval
         eval_dataloader = DataLoader(
