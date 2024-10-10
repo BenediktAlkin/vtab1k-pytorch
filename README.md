@@ -6,6 +6,12 @@ Plug &amp; Play implementation of the Visual Task Adaptation 1K Benchmark (VTAB-
 
 Instructions to setup environment/code and data are provided in [SETUP_DATA.md](https://github.com/BenediktAlkin/vtab1k-pytorch/blob/main/SETUP_DATA.md) and [SETUP_ENV.md](https://github.com/BenediktAlkin/vtab1k-pytorch/blob/main/SETUP_ENV.md).
 
+Instructions for training models to reproduce paper results can be found in [SETUP_TRAIN.md](https://github.com/BenediktAlkin/vtab1k-pytorch/blob/main/SETUP_TRAIN.md).
+This codebase was used for the following papers:
+- [MIM-Refiner](https://arxiv.org/abs/2402.10093)
+- [Vision-LSTM](https://arxiv.org/abs/2406.04303) 
+- [EVA](https://arxiv.org/abs/2410.07170)
+
 # Evaluation Protocol
 
 The default evaluation protocol first tunes hyperparameters on the validation set and then trains a model on the union
