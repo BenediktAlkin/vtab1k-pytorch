@@ -10,7 +10,7 @@ import yaml
 def parse_args():
     parser = ArgumentParser()
     parser.add_argument("--root", type=str, default="./work/summarized")
-    parser.add_argument("--versions", type=str, default="all", choices=["all", "rectangular"])
+    parser.add_argument("--versions", type=str, default="noflowers", choices=["all", "noflowers", "rectangular"])
     parser.add_argument(
         "--metric",
         type=str,
@@ -18,14 +18,18 @@ def parse_args():
         choices=["mean_eval_result", "best_mean_tune_result"],
     )
     parser.add_argument("--pattern", type=str, required=True)
+    parser.add_argument("--exclude_pattern", type=str)
     return vars(parser.parse_args())
 
 
-def main(root, versions, metric, pattern):
+def main(root, versions, metric, pattern, exclude_pattern):
     root = Path(root).expanduser()
     assert root.exists() and root.is_dir()
 
     folders = [fname for fname in os.listdir(root) if pattern in fname]
+    if exclude_pattern is not None:
+        for pattern in exclude_pattern.split(","):
+            folders = [fname for fname in folders if pattern not in fname]
     print(f"found {len(folders)} folders")
     print(f"metric: {metric}")
 
@@ -34,7 +38,28 @@ def main(root, versions, metric, pattern):
             "cifar",
             "caltech101",
             "dtd",
-            # "oxford_flowers102",
+            "oxford_flowers102",
+            "oxford_iiit_pet",
+            "svhn",
+            "sun397",
+            "patch_camelyon",
+            "eurosat",
+            "resisc45",
+            "diabetic_retinopathy",
+            "clevr_count",
+            "clevr_dist",
+            "dmlab",
+            "kitti",
+            "dsprites_loc",
+            "dsprites_ori",
+            "smallnorb_azi",
+            "smallnorb_ele",
+        ]
+    elif versions == "noflowers":
+        versions = [
+            "cifar",
+            "caltech101",
+            "dtd",
             "oxford_iiit_pet",
             "svhn",
             "sun397",
@@ -71,6 +96,7 @@ def main(root, versions, metric, pattern):
     results = []
     stds = []
     best_lrs = []
+    best_ranks = []
     for version in versions:
         version_folders = [fname for fname in folders if version in fname]
         if len(version_folders) == 0:
@@ -98,6 +124,8 @@ def main(root, versions, metric, pattern):
             eval_results = summary["result"]["eval_results"]
             all_results = [eval_results[i]["result"] for i in range(len(eval_results))]
             stds.append(np.std(all_results))
+            if "rank" in summary["result"]["eval_results"][0]:
+                best_ranks.append(summary["result"]["eval_results"][0]["rank"])
         elif metric == "best_mean_tune_result":
             df = pd.DataFrame(summary["result"]["mean_tune_results"])
             best_row = df.loc[df["result"].idxmax()]
@@ -105,6 +133,8 @@ def main(root, versions, metric, pattern):
             best_result = best_row["result"]
             results.append(best_result)
             best_lrs.append(best_lr)
+            if "rank" in best_row:
+                best_ranks.append(best_row["rank"])
         else:
             raise NotImplementedError
     print("accuracies")
@@ -113,6 +143,8 @@ def main(root, versions, metric, pattern):
     print("\t".join(map(str, stds)))
     print("best lrs")
     print("\t".join(best_lrs))
+    print("best ranks")
+    print("\t".join(best_ranks))
 
 
 if __name__ == "__main__":
